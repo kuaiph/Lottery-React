@@ -1,12 +1,12 @@
 import web3 from "./web3";
 
-const address = "0x84163BF79B33103662162Dc99C50304A23ebcd6f";
+const address = "0x3cF0773fcF1Fd7f54C7D4EfEd2F2ee432C56053D";
 
 const abi = [
   {
     constant: true,
-    inputs: [],
-    name: "getBalance",
+    inputs: [{ name: "sender", type: "address" }],
+    name: "getTickets",
     outputs: [{ name: "", type: "uint256" }],
     payable: false,
     stateMutability: "view",
@@ -14,9 +14,18 @@ const abi = [
   },
   {
     constant: true,
-    inputs: [],
-    name: "manager",
+    inputs: [{ name: "_roundsCount", type: "uint256" }],
+    name: "getWinner",
     outputs: [{ name: "", type: "address" }],
+    payable: false,
+    stateMutability: "view",
+    type: "function"
+  },
+  {
+    constant: true,
+    inputs: [{ name: "_roundsCount", type: "uint256" }],
+    name: "getBlockNumber",
+    outputs: [{ name: "", type: "uint256" }],
     payable: false,
     stateMutability: "view",
     type: "function"
@@ -32,9 +41,23 @@ const abi = [
   },
   {
     constant: true,
-    inputs: [],
-    name: "getPlayers",
-    outputs: [{ name: "", type: "address[]" }],
+    inputs: [{ name: "", type: "uint256" }],
+    name: "rounds",
+    outputs: [
+      { name: "endTicketIndex", type: "uint256" },
+      { name: "blockNumber", type: "uint256" },
+      { name: "winner", type: "address" },
+      { name: "amount", type: "uint256" }
+    ],
+    payable: false,
+    stateMutability: "view",
+    type: "function"
+  },
+  {
+    constant: true,
+    inputs: [{ name: "_roundsCount", type: "uint256" }],
+    name: "getAmount",
+    outputs: [{ name: "", type: "uint256" }],
     payable: false,
     stateMutability: "view",
     type: "function"
@@ -42,25 +65,16 @@ const abi = [
   {
     constant: true,
     inputs: [],
-    name: "getWinner",
-    outputs: [{ name: "", type: "address" }],
-    payable: false,
-    stateMutability: "view",
-    type: "function"
-  },
-  {
-    constant: true,
-    inputs: [],
-    name: "winner",
-    outputs: [{ name: "", type: "address" }],
+    name: "roundsCount",
+    outputs: [{ name: "", type: "uint256" }],
     payable: false,
     stateMutability: "view",
     type: "function"
   },
   {
     constant: false,
-    inputs: [],
-    name: "enter",
+    inputs: [{ name: "_ticketsCount", type: "uint256" }],
+    name: "purchaseTickets",
     outputs: [],
     payable: true,
     stateMutability: "payable",
@@ -68,9 +82,9 @@ const abi = [
   },
   {
     constant: true,
-    inputs: [{ name: "", type: "uint256" }],
-    name: "players",
-    outputs: [{ name: "", type: "address" }],
+    inputs: [],
+    name: "getCurrentRound",
+    outputs: [{ name: "", type: "uint256" }],
     payable: false,
     stateMutability: "view",
     type: "function"
