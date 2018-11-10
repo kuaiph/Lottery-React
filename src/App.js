@@ -4,40 +4,7 @@ import web3 from "./web3";
 import lottery from "./lottery";
 import ReactTable from "react-table";
 import "react-table/react-table.css";
-
-class Popup extends React.Component {
-  render() {
-    return (
-      <div className="popup" onClick={this.props.closePopup}>
-        <div className="popup_inner">
-          <div className={"container"}>
-            <h1>More Info</h1>
-            <li>
-              A pseudo-random winner is chosen every ~40,000 blocks (~1 week) by
-              the{" "}
-              <a
-                href="https://www.ethereum-alarm-clock.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Ethereum Alarm Clock (EAC)
-              </a>
-              .
-            </li>
-            <li>
-              A ~.01 ETH fee is paid to the EAC for choosing the winner. The
-              rest is given to the winner.
-            </li>
-            <li>
-              Each ticket costs .01 ETH. Tickets expire after a winner is chosen
-              for each round.
-            </li>
-          </div>
-        </div>
-      </div>
-    );
-  }
-}
+import Popup from "./components/Popup";
 
 class App extends Component {
   state = {
@@ -48,14 +15,25 @@ class App extends Component {
     winner: "",
     time: 0,
     tickets: 0,
-    showPopup: false,
+    moreInfo: false,
+    wrongNetwork: false,
+    noMetaMask: false,
     round: 1,
     history: [],
     blockNumber: 0
   };
 
   async componentDidMount() {
-    await web3.eth.currentProvider.enable();
+    if (web3.currentProvider.isMetaMask) {
+      await web3.eth.currentProvider.enable();
+    } else {
+      this.showNoMetaMask();
+    }
+
+    let network = await web3.eth.net.getNetworkType();
+    if (network !== "ropsten") {
+      this.showWrongNetwork();
+    }
 
     const address = await lottery.options.address;
     let round = await lottery.methods.getCurrentRound().call();
@@ -66,11 +44,6 @@ class App extends Component {
       let currentBlock = await web3.eth.getBlockNumber();
       this.setState({ time: this.state.blockNumber - currentBlock });
     }, 1000);
-
-    let network = await web3.eth.net.getNetworkType();
-    if (network !== "ropsten") {
-      alert("Please switch to the Ropsten testnet.");
-    }
 
     this.setState({ address, round, winner, blockNumber });
     this.updateTable();
@@ -142,9 +115,21 @@ class App extends Component {
     this.setState({ tickets });
   };
 
-  togglePopup() {
+  showMoreInfo() {
     this.setState({
-      showPopup: !this.state.showPopup
+      moreInfo: !this.state.moreInfo
+    });
+  }
+
+  showWrongNetwork() {
+    this.setState({
+      wrongNetwork: !this.state.wrongNetwork
+    });
+  }
+
+  showNoMetaMask() {
+    this.setState({
+      noMetaMask: !this.state.noMetaMask
     });
   }
 
@@ -177,36 +162,42 @@ class App extends Component {
           </a>
           . View the code{" "}
           <a
-            href={"https://github.com/samc621/Lottery-Solidity"}
+            href={
+              "https://github.com/samc621/Lottery-Solidity/blob/master/contracts/lottery.sol"
+            }
             target="_blank"
           >
             here
           </a>
           .
         </p>
-        <p>
-          You must have{" "}
-          <a href={"https://metamask.io/"} target="_blank">
-            Metamask
-          </a>{" "}
-          installed and unlock your account on the Ropsten testnet.
-        </p>
-        <button onClick={this.togglePopup.bind(this)}>More Info</button>
-        {this.state.showPopup ? (
-          <Popup text="Close Me" closePopup={this.togglePopup.bind(this)} />
+        <button onClick={this.showMoreInfo.bind(this)}>More Info</button>
+        {this.state.moreInfo ? (
+          <Popup
+            message={"More Info"}
+            closePopup={this.showMoreInfo.bind(this)}
+          />
         ) : null}
+        {this.state.wrongNetwork ? <Popup message={"Wrong Network"} /> : null}
+        {this.state.noMetaMask ? <Popup message={"No MetaMask"} /> : null}
         <div className={"container flexbox"}>
           <div className={"left"}>
-            <p>The winner will be chosen in</p>
+            <p>Winner chosen in</p>
             <h2>~ {this.state.time} blocks</h2>
-            <p>The current jackpot is </p>
-            <h2>{web3.utils.fromWei(this.state.balance, "ether")} ETH</h2>
           </div>
           <div className={"right"}>
             <p>You own</p>
             <h2>{this.state.tickets} tickets</h2>
-            <p>The last winner was</p>
-            <h2>{this.state.winner}</h2>
+          </div>
+        </div>
+        <div className={"container flexbox"}>
+          <div className={"left"}>
+            <p>Current jackpot is </p>
+            <h2>{web3.utils.fromWei(this.state.balance, "ether")} ETH</h2>
+          </div>
+          <div className={"right"}>
+            <p>Last winner was</p>
+            <h2 className={"word-break"}>{this.state.winner}</h2>
           </div>
         </div>
         <div className={"container"}>
@@ -228,7 +219,7 @@ class App extends Component {
           <ReactTable
             data={this.state.history}
             columns={columns}
-            defaultPageSize="5"
+            defaultPageSize={5}
             style={{ width: "100%" }}
           />
         </div>
