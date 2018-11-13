@@ -157,6 +157,7 @@ class App extends Component {
           <a
             href={"https://ropsten.etherscan.io/address/" + this.state.address}
             target="_blank"
+            rel="noopener noreferrer"
           >
             {this.state.address}
           </a>
@@ -166,6 +167,7 @@ class App extends Component {
               "https://github.com/samc621/Lottery-Solidity/blob/master/contracts/lottery.sol"
             }
             target="_blank"
+            rel="noopener noreferrer"
           >
             here
           </a>

@@ -50,7 +50,11 @@ export default class Popup extends Component {
             <div className={"container"}>
               <h1>
                 You need to install{" "}
-                <a href={"https://metamask.io/"} target="_blank">
+                <a
+                  href={"https://metamask.io/"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   MetaMask
                 </a>{" "}
                 in your browser.
