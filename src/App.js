@@ -24,8 +24,8 @@ class App extends Component {
   };
 
   async componentDidMount() {
-    if (web3.currentProvider.isMetaMask) {
-      await web3.eth.currentProvider.enable();
+    if (window.ethereum.isMetaMask) {
+      await window.ethereum.enable();
     } else {
       this.showNoMetaMask();
     }
@@ -53,20 +53,20 @@ class App extends Component {
 
   updateTable = async () => {
     this.setState({ history: [] });
+    let history = [];
     for (let i = 1; i < this.state.round; i++) {
       let newBlockNumber = await lottery.methods.getBlockNumber(i).call();
       let newWinner = await lottery.methods.getWinner(i).call();
       let newAmount = await lottery.methods.getAmount(i).call();
-      this.setState({
-        history: this.state.history.concat([
-          {
-            blockNumber: newBlockNumber,
-            winner: newWinner,
-            amount: web3.utils.fromWei(newAmount, "ether")
-          }
-        ])
-      });
+
+      let newHistory = {
+        blockNumber: newBlockNumber.toString(),
+        winner: newWinner,
+        amount: web3.utils.fromWei(newAmount.toString(), "ether")
+      };
+      history.push(newHistory);
     }
+    this.setState({ history });
   };
 
   getBalance = async () => {
@@ -189,7 +189,7 @@ class App extends Component {
           </div>
           <div className={"right"}>
             <p>You own</p>
-            <h2>{this.state.tickets} tickets</h2>
+            <h2>{this.state.tickets.toString()} tickets</h2>
           </div>
         </div>
         <div className={"container flexbox"}>
